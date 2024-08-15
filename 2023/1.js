@@ -1,6 +1,9 @@
 const fs = require("fs/promises");
+const path = require("path");
 
-fs.readFile("1-2.txt", { encoding: "utf-8" }).then((data) => {
+const input_path = path.join(__dirname, "1-2.txt");
+
+fs.readFile(input_path, { encoding: "utf-8" }).then((data) => {
     let lines = data.split("\n");
     let sum = lines.reduce((acc_sum, cur_line) => {
         let digits = [];
