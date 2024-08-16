@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 
-const input_path = path.join(__dirname, "1-2.txt");
+const input_path = path.join(__dirname, "1.txt");
 let digits_char = [
     "one",
     "two",

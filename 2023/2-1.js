@@ -4,7 +4,7 @@ const path = require("path");
 const cubes_req = new Map();
 cubes_req.set("red", 12).set("green", 13).set("blue", 14);
 
-const input_path = path.join(__dirname, "3-4.txt");
+const input_path = path.join(__dirname, "2.txt");
 
 // Regexp for matching a line
 // const game_id_regex = /Game (\d+): (( ?[\d]+ (red|blue|green),?)+;?)+/g;

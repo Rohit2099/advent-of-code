@@ -1,7 +1,7 @@
 const fs = require("fs/promises");
 const path = require("path");
 
-const input_path = path.join(__dirname, "3-4.txt");
+const input_path = path.join(__dirname, "2.txt");
 
 fs.readFile(input_path, { encoding: "utf-8" }).then((data) => {
     lines = data.split("\n");
