@@ -1,13 +1,13 @@
-const fs = require("fs/promises");
-const path = require("path");
+import { readFile } from "fs/promises";
+import { join } from "path";
 
-const input_path = path.join(__dirname, "7.txt");
+const __dirname = import.meta.dirname;
+const input_path = join(__dirname, "7.txt");
 
 const STRENGTH_OF_CARDS = [
     "A",
     "K",
     "Q",
-    "J",
     "T",
     "9",
     "8",
@@ -17,6 +17,7 @@ const STRENGTH_OF_CARDS = [
     "4",
     "3",
     "2",
+    "J",
 ];
 
 function getKeysFromHand(hand) {
@@ -28,14 +29,21 @@ function getKeysFromHand(hand) {
 }
 const fiveOfAKind = (hand) => {
     const handKeys = getKeysFromHand(hand);
-    return Object.keys(handKeys).length === 1;
+    const keys = Object.keys(handKeys);
+    return keys.length === 1 || (keys.length === 2 && keys.includes("J"));
 };
 
 const fourOfAKind = (hand) => {
     const handKeys = getKeysFromHand(hand);
     const keys = Object.keys(handKeys);
     if (keys.length === 2) {
-        return handKeys[keys[0]] === 4 || handKeys[keys[1]] === 4;
+        return Object.values(handKeys).includes(4);
+    } else if (keys.length === 3) {
+        if (handKeys["J"] === 1) {
+            return Object.values(handKeys).includes(3);
+        } else {
+            return handKeys["J"] === 2 || handKeys["J"] === 3;
+        }
     } else {
         return false;
     }
@@ -45,11 +53,9 @@ const threeOfAKind = (hand) => {
     const handKeys = getKeysFromHand(hand);
     const keys = Object.keys(handKeys);
     if (keys.length === 3) {
-        return (
-            handKeys[keys[0]] === 3 ||
-            handKeys[keys[1]] === 3 ||
-            handKeys[keys[2]] === 3
-        );
+        return Object.values(handKeys).includes(3);
+    } else if (keys.length === 4) {
+        return handKeys["J"] === 1 || handKeys["J"] === 2;
     } else {
         return false;
     }
@@ -57,19 +63,32 @@ const threeOfAKind = (hand) => {
 
 const fullHouse = (hand) => {
     const handKeys = getKeysFromHand(hand);
-    const keysLength = Object.keys(handKeys).length;
-    return keysLength === 2;
+    const keys = Object.keys(handKeys);
+    if (keys.length === 2) {
+        return true;
+    } else if (keys.length === 3) {
+        return handKeys["J"] === 1;
+    } else {
+        return false;
+    }
 };
 
 const twoPair = (hand) => {
     const handKeys = getKeysFromHand(hand);
-    const keysLength = Object.keys(handKeys).length;
-    return keysLength === 3;
+    const keys = Object.keys(handKeys);
+    return keys.length === 3;
 };
 
 const onePair = (hand) => {
     const handKeys = getKeysFromHand(hand);
-    return Object.keys(handKeys).length === 4;
+    const keys = Object.keys(handKeys);
+    if (keys.length === 4) {
+        return true;
+    } else if (keys.length === 5) {
+        return handKeys["J"] === 1;
+    } else {
+        return false;
+    }
 };
 
 const highCard = (hand) => {
@@ -86,6 +105,7 @@ const RANK_PRIORITY = [
     onePair,
     highCard,
 ];
+
 const getRankOfHand = (hand) => {
     for (let i = 0; i < RANK_PRIORITY.length; ++i) {
         if (RANK_PRIORITY[i](hand)) {
@@ -122,7 +142,7 @@ function comparatorFn(handAndBids1, handAndBids2) {
     }
 }
 
-fs.readFile(input_path, { encoding: "utf-8" }).then((data) => {
+readFile(input_path, { encoding: "utf-8" }).then((data) => {
     const lines = data.split("\n");
     let handAndBids = lines
         .filter((line) => {
