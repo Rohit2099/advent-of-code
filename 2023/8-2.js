@@ -35,7 +35,7 @@ function createTree(nodes) {
 }
 
 fs.readFile(input_path, { encoding: "utf-8" }).then((data) => {
-    let lines = data.trim("\n").split("\n");
+    let lines = data.trim().split("\n");
 
     const directions = lines[0];
     lines = lines.slice(2);
