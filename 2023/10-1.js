@@ -23,89 +23,109 @@ function getNew2DArray(i, j) {
     return a;
 }
 
-function bfs(maze, i, j, visited, comingFrom) {
-    let valid = i >= 0 && i < maze.length && j >= 0 && j < maze[0].length;
-    if (!valid) {
-        return undefined;
-    }
-    if (maze[i][j] === "S") {
-        return 1;
-    }
-    if (visited[i][j]) {
-        return undefined;
-    }
-    visited[i][j] = true;
+function bfs(maze, rowStart, colStart, inputComingFrom) {
+    let i = rowStart,
+        j = colStart,
+        comingFrom = inputComingFrom;
+    let result = 0;
+    let visited = getNew2DArray(maze.length, maze[0].length);
+    while (true) {
+        let valid = i >= 0 && i < maze.length && j >= 0 && j < maze[0].length;
+        if (!valid) {
+            return undefined;
+        }
+        if (maze[i][j] === "S") {
+            return result + 1;
+        }
+        if (visited[i][j]) {
+            return undefined;
+        }
+        visited[i][j] = true;
 
-    switch (maze[i][j]) {
-        case ".":
-            return undefined;
-        case "|":
-            if (comingFrom === "down") {
-                return 1 + bfs(maze, i - 1, j, visited, "down");
-            } else if (comingFrom === "up") {
-                return 1 + bfs(maze, i + 1, j, visited, "up");
-            } else {
+        switch (maze[i][j]) {
+            case ".":
                 return undefined;
-            }
-        case "-":
-            if (comingFrom === "left") {
-                return 1 + bfs(maze, i, j + 1, visited, "left");
-            } else if (comingFrom === "right") {
-                return 1 + bfs(maze, i, j - 1, visited, "right");
-            } else {
+            case "|":
+                if (comingFrom === "down") {
+                    i -= 1;
+                    comingFrom = "down";
+                } else if (comingFrom === "up") {
+                    i += 1;
+                    comingFrom = "up";
+                } else {
+                    return undefined;
+                }
+                break;
+            case "-":
+                if (comingFrom === "left") {
+                    j += 1;
+                    comingFrom = "left";
+                } else if (comingFrom === "right") {
+                    j -= 1;
+                    comingFrom = "right";
+                } else {
+                    return undefined;
+                }
+                break;
+            case "L":
+                if (comingFrom === "up") {
+                    j += 1;
+                    comingFrom = "left";
+                } else if (comingFrom === "right") {
+                    i -= 1;
+                    comingFrom = "down";
+                } else {
+                    return undefined;
+                }
+                break;
+            case "J":
+                if (comingFrom === "up") {
+                    j -= 1;
+                    comingFrom = "right";
+                } else if (comingFrom === "left") {
+                    i -= 1;
+                    comingFrom = "down";
+                } else {
+                    return undefined;
+                }
+                break;
+            case "7":
+                if (comingFrom === "down") {
+                    j -= 1;
+                    comingFrom = "right";
+                } else if (comingFrom === "left") {
+                    i += 1;
+                    comingFrom = "up";
+                } else {
+                    return undefined;
+                }
+                break;
+            case "F":
+                if (comingFrom === "right") {
+                    i += 1;
+                    comingFrom = "up";
+                } else if (comingFrom === "down") {
+                    j += 1;
+                    comingFrom = "left";
+                } else {
+                    return undefined;
+                }
+                break;
+            default:
                 return undefined;
-            }
-        case "L":
-            if (comingFrom === "up") {
-                return 1 + bfs(maze, i, j + 1, visited, "left");
-            } else if (comingFrom === "right") {
-                return 1 + bfs(maze, i - 1, j, visited, "down");
-            } else {
-                return undefined;
-            }
-        case "J":
-            if (comingFrom === "up") {
-                return 1 + bfs(maze, i, j - 1, visited, "right");
-            } else if (comingFrom === "left") {
-                return 1 + bfs(maze, i - 1, j, visited, "down");
-            } else {
-                return undefined;
-            }
-        case "7":
-            if (comingFrom === "down") {
-                return 1 + bfs(maze, i, j - 1, visited, "right");
-            } else if (comingFrom === "left") {
-                return 1 + bfs(maze, i + 1, j, visited, "up");
-            } else {
-                return undefined;
-            }
-        case "F":
-            if (comingFrom === "right") {
-                return 1 + bfs(maze, i + 1, j, visited, "up");
-            } else if (comingFrom === "down") {
-                return 1 + bfs(maze, i, j + 1, visited, "left");
-            } else {
-                return undefined;
-            }
-        default:
-            return undefined;
+        }
+        result += 1;
     }
 }
 
 function findMazeLength(maze, startPos) {
-    let numberOfSteps = undefined;
-    let visited = getNew2DArray(maze.length, maze[0].length);
-    visited[startPos[0]][startPos[1]] = true;
     // Right
-    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0], startPos[1] + 1, visited, "left");
-    visited = getNew2DArray(maze.length, maze[0].length);
-    visited[startPos[0]][startPos[1]] = true;
+    let numberOfSteps;
+    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0], startPos[1] + 1, "left");
     // left
-    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0], startPos[1] - 1, visited, "right");
-    visited = getNew2DArray(maze.length, maze[0].length);
-    visited[startPos[0]][startPos[1]] = true;
+    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0], startPos[1] - 1, "right");
     // up
-    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0] - 1, startPos[1], visited, "down");
+    numberOfSteps = numberOfSteps ?? bfs(maze, startPos[0] - 1, startPos[1], "down");
     return numberOfSteps;
 }
 
