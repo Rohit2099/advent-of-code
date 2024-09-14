@@ -1,4 +1,10 @@
+// Odd-even rule
+// shoelace theorem and pick's theorem
+// expanding the maze by adding buffers so that all outside points can be reached using flood fill
+
 const fs = require("fs/promises");
+const { sortAscending } = require("./utils");
+
 const path = require("path");
 
 const input_path = path.resolve(__dirname, "10.txt");
@@ -38,14 +44,18 @@ function bfs(maze, rowStart, colStart, inputComingFrom) {
         comingFrom = inputComingFrom;
     let visited = getNew2DArray(maze.length, maze[0].length);
     let path = {};
+    let boundaryCoords = {};
     while (true) {
         let valid = i >= 0 && i < maze.length && j >= 0 && j < maze[0].length;
         if (!valid) {
             return undefined;
         }
         if (maze[i][j] === "S") {
+            if (inputComingFrom === "down") {
+                boundaryCoords[i].push(j);
+            }
             path[`(${i}, ${j})`] = true;
-            return path;
+            return [path, boundaryCoords];
         }
         if (visited[i][j]) {
             return undefined;
@@ -57,6 +67,10 @@ function bfs(maze, rowStart, colStart, inputComingFrom) {
             case ".":
                 return undefined;
             case "|":
+                if (!boundaryCoords[i]) {
+                    boundaryCoords[i] = [];
+                }
+                boundaryCoords[i].push(j);
                 if (comingFrom === "down") {
                     i -= 1;
                     comingFrom = "down";
@@ -79,6 +93,10 @@ function bfs(maze, rowStart, colStart, inputComingFrom) {
                 }
                 break;
             case "L":
+                if (!boundaryCoords[i]) {
+                    boundaryCoords[i] = [];
+                }
+                boundaryCoords[i].push(j);
                 if (comingFrom === "up") {
                     j += 1;
                     comingFrom = "left";
@@ -90,6 +108,10 @@ function bfs(maze, rowStart, colStart, inputComingFrom) {
                 }
                 break;
             case "J":
+                if (!boundaryCoords[i]) {
+                    boundaryCoords[i] = [];
+                }
+                boundaryCoords[i].push(j);
                 if (comingFrom === "up") {
                     j -= 1;
                     comingFrom = "right";
@@ -169,28 +191,24 @@ function findAreaOutsideLoop(maze, mazePath) {
         }
         outerRegion += callBFSFill(mazePath, visited, 0, j, n, m, outerPoints);
     }
-    console.log(outerRegion);
     for (let j = 0; j < m; ++j) {
         if (visited[n - 1][j] || mazePath[`(${n - 1}, ${j}`]) {
             continue;
         }
         outerRegion += callBFSFill(mazePath, visited, n - 1, j, n, m, outerPoints);
     }
-    console.log(outerRegion);
     for (let j = 0; j < n; ++j) {
         if (visited[j][0] || mazePath[`(${j}, 0`]) {
             continue;
         }
         outerRegion += callBFSFill(mazePath, visited, j, 0, n, m, outerPoints);
     }
-    console.log(outerRegion);
     for (let j = 0; j < m; ++j) {
         if (visited[j][m - 1] || mazePath[`(${j}, ${m - 1}`]) {
             continue;
         }
         outerRegion += callBFSFill(mazePath, visited, j, m - 1, n, m, outerPoints);
     }
-    console.log(outerRegion);
     return outerPoints;
 }
 
@@ -224,20 +242,32 @@ function drawMazePath(maze, mazePath, outerPoints) {
     fs.writeFile("10-out.txt", finalString, { encoding: "utf-8" });
 }
 
+function findInnerArea(mazePath, boundaryCoords) {
+    let result = 0;
+    for (let row in boundaryCoords) {
+        let curRow = boundaryCoords[row];
+        curRow.sort(sortAscending);
+        for (let j = 0; j + 1 < curRow.length; j += 2) {
+            for (let start = curRow[j] + 1; start < curRow[j + 1]; ++start) {
+                if (!mazePath[`(${row}, ${start})`]) {
+                    // Using the correct boundaryCoords will not require to use additional checks on outerPoints.
+                    result += 1;
+                }
+            }
+        }
+    }
+    return result;
+}
+
 fs.readFile(input_path, { encoding: "utf-8" }).then((data) => {
     lines = data.trim().split("\n");
     let maze = lines.map((line) => {
         return line.split("");
     });
     const startPos = findStartPos(maze);
-    let mazePath = findMazePath(maze, startPos);
+    let [mazePath, boundaryCoords] = findMazePath(maze, startPos);
     const outerPoints = findAreaOutsideLoop(maze, mazePath);
+    let innerArea = findInnerArea(mazePath, boundaryCoords, outerPoints);
+    console.log(innerArea);
     drawMazePath(maze, mazePath, outerPoints);
-    // const totalPoints = maze.length * maze[0].length;
-    // const loopPoints = Object.keys(mazePath).length;
-    // const innerPoints = totalPoints - outerArea - loopPoints;
-    // console.log(`Maze Length: ${loopPoints}`);
-    // console.log(`Total points: ${totalPoints}`);
-    // console.log(`Outer Area: ${outerArea}`);
-    // console.log(`Inner points: ${innerPoints}`);
 });

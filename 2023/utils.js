@@ -20,4 +20,8 @@ function lcmOfNums(...arr) {
     return lcmOfAllNums;
 }
 
-module.exports = { lcmOfNums };
+function sortAscending(a, b) {
+    return a > b ? 1 : -1;
+}
+
+module.exports = { lcmOfNums, sortAscending };
