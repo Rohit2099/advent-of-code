@@ -3,6 +3,16 @@ const path = require("path");
 
 const input_path = path.resolve(__dirname, "10.txt");
 
+const SHAPE_TO_CODE = {
+    "|": "\u2502",
+    "-": "\u2500",
+    L: "\u2514",
+    J: "\u2518",
+    7: "\u2510",
+    F: "\u250C",
+    S: "S",
+};
+
 function findStartPos(maze) {
     for (let i = 0; i < maze.length; i++) {
         for (let j = 0; j < maze[i].length; j++) {
@@ -196,7 +206,8 @@ function drawMazePath(maze, mazePath, outerPoints) {
         let [_, i, j] = entry.match(/\((\d+), (\d+)\)/);
         i = parseInt(i);
         j = parseInt(j);
-        newMaze[i][j] = ".";
+        let pipeChar = SHAPE_TO_CODE[maze[i][j]];
+        newMaze[i][j] = pipeChar;
     }
 
     for (let entry in outerPoints) {
